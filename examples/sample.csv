@@ -1,0 +1,4 @@
+customerId,name,primaryEmail,billingAddress,accountId,accountName,accountInvoiceCurrency,accountAliases,balance
+10001,Wayne Enterprises,directors@wayneent.com,"Wayne Towers, Gotham, US",cus_0001_acc_0001,Bruce,USD,Knight;Saviour,56.21
+10002,Stark Industries,directors@starkindus.com,"Stark Towers, LA, US",cus_0002_acc_0001,Tony,,,98.3
+10003,Queens Consolidated,directors@queenscons.com,"Star city, US",,,,,3.5

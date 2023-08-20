@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"encoding/json"
-	"errors"
 	"examples/models"
 	"examples/utils"
 	"fmt"
@@ -11,48 +10,48 @@ import (
 	"strings"
 )
 
-func CsvScanner(scanner *bufio.Scanner) (models.CsvReader, error) {
-	next := scanner.Scan()
-	if !next {
-		return models.CsvReader{}, errors.New("reached EOF")
-	}
+func CsvScanner(fileName string) models.CsvReader {
+	// Can be client side call - Convert file from DOS to Unix format
+	utils.ExecSed(fileName, "s/\r$//")
 
-	headers := strings.Split(scanner.Text(), ",")
+	file, err := os.Open(fileName)
+	utils.PanicError(err)
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	scanner.Scan()
+	text := scanner.Text()
+	headers := strings.Split(text, ",")
 	headerMap := map[string]int{}
 	for index, header := range headers {
 		headerMap[header] = index
 	}
 
 	return models.CsvReader{
-		Scanner: scanner,
-		Header:  headerMap,
-		Row:     make([]interface{}, len(headerMap)),
-	}, nil
+		Scanner:   scanner,
+		FileName:  fileName,
+		RawText:   text,
+		Header:    headerMap,
+		RowNumber: 0,
+		Row:       make([]interface{}, len(headerMap)),
+	}
 }
 
 func main() {
-	file, err := os.Open("sample.csv")
-	utils.PanicError(err)
+	scanner := CsvScanner("sample.csv")
 
-	defer file.Close()
-
-	scanner, err := CsvScanner(bufio.NewScanner(file))
-	utils.PanicError(err)
+	// Append import result headers
+	scanner.SetResultHeaders()
 
 	const url = "https://webhook.site/c5918e84-4de2-4f02-9c97-ffbd908b6dd7"
 	const contentType = "application/json"
 
 	for scanner.Scan() {
-		//record := scanner.CsvColumn("name")
-		//fmt.Println(record)
-
 		body, err := json.MarshalIndent(scanner.ToJson(), "", "  ")
 		utils.PanicError(err)
 		fmt.Printf("%s\n", body)
 
 		//http.Post(url, contentType, body)
+		scanner.SetImportResults(false, "ratelimit", "429 Too Many Requests")
 	}
-
-	err = scanner.Scanner.Err()
-	utils.PanicError(err)
 }

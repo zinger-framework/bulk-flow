@@ -2,10 +2,8 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"examples/models"
 	"examples/utils"
-	"fmt"
 	"os"
 	"strings"
 )
@@ -43,15 +41,8 @@ func main() {
 	// Append import result headers
 	scanner.SetResultHeaders()
 
-	const url = "https://webhook.site/c5918e84-4de2-4f02-9c97-ffbd908b6dd7"
-	const contentType = "application/json"
-
 	for scanner.Scan() {
-		body, err := json.MarshalIndent(scanner.ToJson(), "", "  ")
-		utils.PanicError(err)
-		fmt.Printf("%s\n", body)
-
-		//http.Post(url, contentType, body)
-		scanner.SetImportResults(false, "ratelimit", "429 Too Many Requests")
+		response := scanner.SendRequest()
+		scanner.HandleResponse(response)
 	}
 }

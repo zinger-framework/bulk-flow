@@ -2,15 +2,22 @@ package models
 
 import (
 	"bufio"
+	"encoding/json"
 	"examples/utils"
 	"fmt"
 	"github.com/asaskevich/govalidator"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
 )
 
 const RegexPattern = `(?:,|\n|^)("(?:(?:"")*[^"]*)*"|[^",\n]*|(?:\n|$))`
+const (
+	VALIDATION_ERROR  = "validation"
+	RATELIMIT_ERROR   = "ratelimit"
+	DESTINATION_ERROR = "destination"
+)
 
 var ImportResults = []string{"import_success", "import_error_type", "import_error_reason"}
 var Regex = regexp.MustCompile(RegexPattern)
@@ -76,8 +83,14 @@ func (csvReader *CsvReader) SetImportResults(success bool, errorType string, err
 	csvReader.ImportErrorType = errorType
 	csvReader.ImportErrorReason = errorReason
 
-	// Append import response
-	csvReader.SetResults()
+	// Append import response to file
+	results := []string{
+		strconv.FormatBool(csvReader.ImportSuccess),
+		csvReader.ImportErrorType,
+		csvReader.ImportErrorReason,
+	}
+	result := fmt.Sprintf("%ds/$/,%s/", csvReader.RowNumber+1, strings.Join(results, ","))
+	utils.ExecSed(csvReader.FileName, result)
 }
 
 func (csvReader *CsvReader) CsvColumn(key string) interface{} {
@@ -85,25 +98,43 @@ func (csvReader *CsvReader) CsvColumn(key string) interface{} {
 }
 
 func (csvReader *CsvReader) ToJson() map[string]interface{} {
-	json := make(map[string]interface{})
+	jsonData := make(map[string]interface{})
 	for key, value := range csvReader.Header {
-		json[key] = csvReader.Row[value]
+		jsonData[key] = csvReader.Row[value]
 	}
-	return json
-}
-
-func (csvReader *CsvReader) SetResults(results ...string) {
-	if len(results) < 1 {
-		results = []string{
-			strconv.FormatBool(csvReader.ImportSuccess),
-			csvReader.ImportErrorType,
-			csvReader.ImportErrorReason,
-		}
-	}
-	result := fmt.Sprintf("%ds/$/,%s/", csvReader.RowNumber+1, strings.Join(results, ","))
-	utils.ExecSed(csvReader.FileName, result)
+	return jsonData
 }
 
 func (csvReader *CsvReader) SetResultHeaders() {
-	csvReader.SetResults(ImportResults...)
+	result := fmt.Sprintf("%ds/$/,%s/", csvReader.RowNumber+1, strings.Join(ImportResults, ","))
+	utils.ExecSed(csvReader.FileName, result)
+}
+
+func (csvReader *CsvReader) SendRequest() *http.Response {
+	const url = "https://webhook.site/c5918e84-4de2-4f02-9c97-ffbd908b6dd7"
+	const contentType = "application/json"
+	const reqMethod = "POST"
+
+	body, err := json.Marshal(csvReader.ToJson())
+	utils.PanicError(err)
+	fmt.Printf("%s\n", body)
+
+	request, err := http.NewRequest(reqMethod, url, strings.NewReader(string(body)))
+	request.Header.Set("Content-Type", contentType)
+	utils.PanicError(err)
+
+	response, err := http.DefaultClient.Do(request)
+	utils.PanicError(err)
+
+	return response
+}
+
+func (csvReader *CsvReader) HandleResponse(response *http.Response) {
+	if response.StatusCode/100 == 2 {
+		// success
+		csvReader.SetImportResults(true, "", "")
+	} else {
+		// failure
+		csvReader.SetImportResults(false, RATELIMIT_ERROR, response.Status)
+	}
 }

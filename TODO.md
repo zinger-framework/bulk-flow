@@ -1,10 +1,8 @@
 # TODO
 
-* AWS Crash Course
-  * EFS
-  * Lambda
-  * EC2
-* Bash script to chunk data
+* How to chunk data?
+    * TPS available Vs not-available
+* Fetch current status of import
 * Complete Golang course
     * Build API
       * Setup mock server in golang
@@ -15,5 +13,4 @@ After Harsha approval,
 
 * Setup localstack
 * Add lambda trigger
-* Handle S3 upload/download
 * Setup IaaC

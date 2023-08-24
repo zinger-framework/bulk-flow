@@ -10,16 +10,21 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const RegexPattern = `(?:,|\n|^)("(?:(?:"")*[^"]*)*"|[^",\n]*|(?:\n|$))`
 const (
-	VALIDATION_ERROR  = "validation"
-	RATELIMIT_ERROR   = "ratelimit"
-	DESTINATION_ERROR = "destination"
+	ValidationError  = "validation"
+	RatelimitError   = "ratelimit"
+	DestinationError = "destination"
+)
+const (
+	ImportSuccess = "IMP_SUCCESS"
+	ImportFailed  = "IMP_FAILED"
 )
 
-var ImportResults = []string{"import_success", "import_error_type", "import_error_reason"}
+var ImportResults = []string{"import_status", "import_error_type", "import_error_reason", "import_processed_at"}
 var Regex = regexp.MustCompile(RegexPattern)
 
 type CsvReader struct {
@@ -29,9 +34,10 @@ type CsvReader struct {
 	Header            map[string]int
 	RowNumber         int
 	Row               []interface{}
-	ImportSuccess     bool
+	ImportStatus      string
 	ImportErrorType   string
 	ImportErrorReason string
+	ImportProcessedAt string
 }
 
 func (csvReader *CsvReader) Scan() bool {
@@ -78,16 +84,18 @@ func (csvReader *CsvReader) SetCsvColumn(index int, value interface{}) {
 	csvReader.Row[index] = value
 }
 
-func (csvReader *CsvReader) SetImportResults(success bool, errorType string, errorReason string) {
-	csvReader.ImportSuccess = success
+func (csvReader *CsvReader) SetImportResults(status string, errorType string, errorReason string) {
+	csvReader.ImportStatus = status
 	csvReader.ImportErrorType = errorType
 	csvReader.ImportErrorReason = errorReason
+	csvReader.ImportProcessedAt = time.Now().UTC().Format("2006-01-02T15:04:05")
 
 	// Append import response to file
 	results := []string{
-		strconv.FormatBool(csvReader.ImportSuccess),
+		csvReader.ImportStatus,
 		csvReader.ImportErrorType,
 		csvReader.ImportErrorReason,
+		csvReader.ImportProcessedAt,
 	}
 	result := fmt.Sprintf("%ds/$/,%s/", csvReader.RowNumber+1, strings.Join(results, ","))
 	utils.ExecSed(csvReader.FileName, result)
@@ -132,9 +140,9 @@ func (csvReader *CsvReader) SendRequest() *http.Response {
 func (csvReader *CsvReader) HandleResponse(response *http.Response) {
 	if response.StatusCode/100 == 2 {
 		// success
-		csvReader.SetImportResults(true, "", "")
+		csvReader.SetImportResults(ImportSuccess, "", "")
 	} else {
 		// failure
-		csvReader.SetImportResults(false, RATELIMIT_ERROR, response.Status)
+		csvReader.SetImportResults(ImportFailed, RatelimitError, response.Status)
 	}
 }

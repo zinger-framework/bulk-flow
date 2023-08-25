@@ -1,7 +1,6 @@
 # TODO
 
-* How to chunk data?
-    * TPS available Vs not-available
+* Code snippet for destination call lambda
 * Fetch current status of import
 * Complete Golang course
     * Build API

@@ -1,4 +1,11 @@
 customerId,name,primaryEmail,billingAddress,accountId,accountName,accountInvoiceCurrency,accountAliases,balance
 10001,Wayne Enterprises,directors@wayneent.com,"Wayne Towers, Gotham, US",cus_0001_acc_0001,Bruce,USD,Knight;Saviour,56.21
 10002,Stark Industries,directors@starkindus.com,"Stark Towers, LA, US",cus_0002_acc_0001,Tony,,,98.3
-10003,Queens Consolidated,directors@queenscons.com,"Star city, US",,,,,3.5
+10003,Queen3 Consolidated,directors@queenscons.com,"Star city, US",,,,,3.5
+10004,Queen4 Consolidated,directors@queenscons.com,"Star city, US",,,,,4.5
+10005,Queen5 Consolidated,directors@queenscons.com,"Star city, US",,,,,5.5
+10006,Queen6 Consolidated,directors@queenscons.com,"Star city, US",,,,,6.5
+10007,Queen7 Consolidated,directors@queenscons.com,"Star city, US",,,,,7.5
+10008,Queen8 Consolidated,directors@queenscons.com,"Star city, US",,,,,8.5
+10009,Queen9 Consolidated,directors@queenscons.com,"Star city, US",,,,,9.5
+10010,Queen10 Consolidated,directors@queenscons.com,"Star city, US",,,,,10.5

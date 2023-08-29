@@ -4,13 +4,14 @@ import (
 	"bufio"
 	"examples/models"
 	"examples/utils"
+	"fmt"
 	"os"
 	"strings"
 )
 
 func CsvScanner(fileName string) models.CsvReader {
 	// Can be client side call - Convert file from DOS to Unix format
-	utils.ExecSed(fileName, "s/\r$//")
+	utils.ReplacePattern(fileName, "s/\r$//")
 
 	file, err := os.Open(fileName)
 	utils.PanicError(err)
@@ -30,7 +31,7 @@ func CsvScanner(fileName string) models.CsvReader {
 		FileName:  fileName,
 		RawText:   text,
 		Header:    headerMap,
-		RowNumber: 0,
+		RowNumber: 1,
 		Row:       make([]interface{}, len(headerMap)),
 	}
 }
@@ -39,7 +40,8 @@ func main() {
 	scanner := CsvScanner("sample.csv")
 
 	// Append import result headers
-	scanner.SetResultHeaders()
+	result := fmt.Sprintf("%ds/$/,%s/", scanner.RowNumber, strings.Join(models.ResultHeaders, ","))
+	utils.ReplacePattern(scanner.FileName, result)
 
 	for scanner.Scan() {
 		response := scanner.SendRequest()

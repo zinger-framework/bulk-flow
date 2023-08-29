@@ -1,6 +1,6 @@
 # TODO
 
-* Code snippet for destination call lambda
+* Implement isFileFullyProcessed()
 * Fetch current status of import
 * Complete Golang course
     * Build API

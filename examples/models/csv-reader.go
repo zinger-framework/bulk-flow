@@ -24,7 +24,7 @@ const (
 	ImportFailed  = "IMP_FAILED"
 )
 
-var ImportResults = []string{"import_status", "import_error_type", "import_error_reason", "import_processed_at"}
+var ResultHeaders = []string{"import_status", "import_error_type", "import_error_reason", "import_processed_at"}
 var Regex = regexp.MustCompile(RegexPattern)
 
 type CsvReader struct {
@@ -97,8 +97,8 @@ func (csvReader *CsvReader) SetImportResults(status string, errorType string, er
 		csvReader.ImportErrorReason,
 		csvReader.ImportProcessedAt,
 	}
-	result := fmt.Sprintf("%ds/$/,%s/", csvReader.RowNumber+1, strings.Join(results, ","))
-	utils.ExecSed(csvReader.FileName, result)
+	result := fmt.Sprintf("%ds/$/,%s/", csvReader.RowNumber, strings.Join(results, ","))
+	utils.ReplacePattern(csvReader.FileName, result)
 }
 
 func (csvReader *CsvReader) CsvColumn(key string) interface{} {
@@ -111,11 +111,6 @@ func (csvReader *CsvReader) ToJson() map[string]interface{} {
 		jsonData[key] = csvReader.Row[value]
 	}
 	return jsonData
-}
-
-func (csvReader *CsvReader) SetResultHeaders() {
-	result := fmt.Sprintf("%ds/$/,%s/", csvReader.RowNumber+1, strings.Join(ImportResults, ","))
-	utils.ExecSed(csvReader.FileName, result)
 }
 
 func (csvReader *CsvReader) SendRequest() *http.Response {

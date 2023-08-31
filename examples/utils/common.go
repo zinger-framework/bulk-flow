@@ -50,9 +50,9 @@ func FetchFileRowCount(fileName string) int {
 	return ToInteger(string(result))
 }
 
-func IsFileFullyProcessed(fileName string, rowCount int) bool {
-	result, err := exec.Command("grep", "-c", ",import_", fileName).Output()
+func FetchRowCount(fileName string, pattern string) int {
+	result, err := exec.Command("grep", "-c", pattern, fileName).Output()
 	PanicError(err)
 
-	return ToInteger(string(result)) == rowCount
+	return ToInteger(string(result))
 }

@@ -38,7 +38,7 @@ func ProcessLambda(srcFileName string, position models.Position, headerMap map[s
 	if scanner.RowNumber < position.End {
 		position.Start = scanner.RowNumber + 1
 		// Trigger next set of lambda in async mode
-	} else if utils.IsFileFullyProcessed(srcFileName, rowCount) {
+	} else if utils.FetchRowCount(srcFileName, models.ImportProcessed) == rowCount {
 		// Upload srcFile to S3.
 		// Delete srcFile from server if upload success.
 	}

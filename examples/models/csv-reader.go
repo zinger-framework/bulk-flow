@@ -24,6 +24,12 @@ const (
 	ImportFailed  = "import_failed"
 )
 
+const (
+	ImportProcessed = ",import_"
+	ImportSucceeded = "," + ImportSuccess + ","
+	ImportStopped   = "," + ImportFailed + ","
+)
+
 var ResultHeaders = []string{"import_status", "import_error_type", "import_error_reason", "import_processed_at"}
 var Regex = regexp.MustCompile(RegexPattern)
 

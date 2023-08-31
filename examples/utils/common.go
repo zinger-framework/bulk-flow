@@ -36,13 +36,23 @@ func FetchHeaderFromFile(fileName string) map[string]int {
 	return headerMap
 }
 
+func ToInteger(result string) int {
+	value, err := strconv.ParseInt(strings.TrimSpace(result), 10, 0)
+	PanicError(err)
+
+	return int(value)
+}
+
 func FetchFileRowCount(fileName string) int {
 	result, err := exec.Command("sed", "-n", "$=", fileName).Output()
 	PanicError(err)
 
-	resultCount := strings.TrimSpace(string(result))
-	count, err := strconv.ParseInt(resultCount, 10, 0)
+	return ToInteger(string(result))
+}
+
+func IsFileFullyProcessed(fileName string, rowCount int) bool {
+	result, err := exec.Command("grep", "-c", ",import_", fileName).Output()
 	PanicError(err)
 
-	return int(count)
+	return ToInteger(string(result)) == rowCount
 }

@@ -20,8 +20,8 @@ const (
 	DestinationError = "destination"
 )
 const (
-	ImportSuccess = "IMP_SUCCESS"
-	ImportFailed  = "IMP_FAILED"
+	ImportSuccess = "import_success"
+	ImportFailed  = "import_failed"
 )
 
 var ResultHeaders = []string{"import_status", "import_error_type", "import_error_reason", "import_processed_at"}

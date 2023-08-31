@@ -1,6 +1,5 @@
 # TODO
 
-* Implement isFileFullyProcessed()
 * Fetch current status of import
 * Complete Golang course
     * Build API

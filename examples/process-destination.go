@@ -9,7 +9,7 @@ import (
 
 const MaxBatchSize = 50
 
-func ProcessLambda(srcFileName string, position models.Position, headerMap map[string]int) {
+func ProcessLambda(srcFileName string, position models.Position, headerMap map[string]int, rowCount int) {
 	destFileName := "tmp/output.csv"
 	endPosition := position.End
 	if endPosition > MaxBatchSize {
@@ -38,21 +38,17 @@ func ProcessLambda(srcFileName string, position models.Position, headerMap map[s
 	if scanner.RowNumber < position.End {
 		position.Start = scanner.RowNumber + 1
 		// Trigger next set of lambda in async mode
-	} else if isFileFullyProcessed(srcFileName) {
+	} else if utils.IsFileFullyProcessed(srcFileName, rowCount) {
 		// Upload srcFile to S3.
 		// Delete srcFile from server if upload success.
 	}
-}
-
-func isFileFullyProcessed(filename string) bool {
-	// TODO: implementation
-	return true
 }
 
 func main() {
 	fileName := "sample.csv"
 	position := models.Position{Start: 6, End: 10}
 	headerMap := utils.FetchHeaderFromFile(fileName)
+	rowCount := utils.FetchFileRowCount(fileName)
 
-	ProcessLambda(fileName, position, headerMap)
+	ProcessLambda(fileName, position, headerMap, rowCount)
 }
